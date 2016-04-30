@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+
+
+	<!-- 配置自动扫描的包 -->
+	<context:component-scan base-package="so.dun.springmvc"></context:component-scan>
+	
+	<!-- 配置视图解析器：把handler方法的返回值解析为实际的视图 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/views/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+	
+	<!-- 配置BeanNameViewResolver视图解析器 ：使用视图的名字来解析视图-->
+	<!-- 通过Order属性来定义视图解析器的优先级，Order值越小，优先级越高 -->
+  	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver">
+		<property name="order" value="100"></property>
+	</bean>  
+	
+	<!-- 配置国际化资源文件 -->
+ 	<bean id="messageSource" 
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="i18n"></property>
+	</bean>
+	
+	<!-- 配置直接转发的页面 -->
+	<!-- 可以直接相应转发页面，而无需再经过Handler的方法 -->
+  		<mvc:view-controller path="/success" view-name="success"/> 
+  	<!-- 	<mvc:view-controller path="/i18n" view-name="success"/>  -->
+  		
+	<!-- 通常都需要配置mvc：annotation-driven标签，否则使用直接转发页面会导致使用Handler的转发失效 -->
+ 	  	<mvc:annotation-driven conversion-service="conversionService"></mvc:annotation-driven> 
+ 	  	
+ 	<!-- 配置ConversionService -->
+	 	 <bean id="conversionService"
+	 	 	class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+	 	 	<property name="converters">
+	 	 		<set>
+	 	 			<ref bean="employeeConverter"/>
+	 	 		</set>
+	 	 	</property>
+	 	 </bean>
+ 	  	
+	<!-- 处理静态资源 -->
+ 	 	<mvc:default-servlet-handler/>
+ 	 	
+ 	<!-- 配置SessionLocalResolver -->
+ 	<bean id="localeResolver"
+ 		class="org.springframework.web.servlet.i18n.SessionLocaleResolver"></bean>
+ 	 
+ 	<mvc:interceptors>
+ 		<!-- 配置自定义的拦截器 -->
+ 		<bean class="so.dun.springmvc.interceptors.FirstInterceptor"></bean>
+	 	<!-- 配置LocaleChanceInterceptor -->
+ 		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"></bean>
+ 		<!-- 配置拦截器（不）作用的路径 -->
+ 		<mvc:interceptor>
+ 			<mvc:mapping path="/emps"/>
+			<bean class="so.dun.springmvc.interceptors.SecondInterceptor"></bean> 		
+ 		</mvc:interceptor>
+ 	</mvc:interceptors>
+ 	
+ 	<bean id="multipartResolver"
+ 		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+ 		<property name="defaultEncoding" value="UTF-8"></property>
+ 	</bean>
+ 	
+ 	<!-- 配置使用SimpleMappingExceptionResolver来映射异常 -->
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionAttribute" value="exception"></property>
+		<property name="exceptionMappings">
+			<props>
+				<prop key="java.lang.ArrayIndexOutOfBoundsException">error</prop>
+			</props>		
+		</property>
+	</bean> 	 	
+</beans>
+
+
+
+
+
+
+
+
+
